@@ -38,7 +38,7 @@ async function findFiles() {
 async function processFilePair(csvPath, excelPath, gcsService, fileService) {
     try {
         const csvFileName = path.basename(csvPath, '.csv');
-        const outputPath = path.join(outDir, `output_${csvFileName}.csv`);
+        const outputPath = path.join(outDir, `${csvFileName}.csv`);
 
         console.log(`\nProcessing files:`);
         console.log(`CSV: ${csvFileName}`);
