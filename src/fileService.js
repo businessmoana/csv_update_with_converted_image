@@ -17,7 +17,7 @@ class FileService {
 
             data.forEach(row => {
                 const originalName = row['Image Name'];
-                const translatedName = row['Translated Image Name'];
+                const translatedName = row['Converted Image Name'];
                 if (originalName && translatedName) {
                     this.imageMapping.set(originalName, translatedName);
                 }
