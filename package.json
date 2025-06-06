@@ -12,6 +12,7 @@
     "@google-cloud/storage": "^7.7.0",
     "csv-parser": "^3.0.0",
     "csv-update-with-converted-image": "file:",
+    "csv-writer": "^1.6.0",
     "dotenv": "^16.3.1",
     "nodemon": "^3.1.10",
     "xlsx": "^0.18.5"
