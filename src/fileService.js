@@ -2,6 +2,7 @@ const XLSX = require('xlsx');
 const fs = require('fs');
 const path = require('path');
 const csv = require('csv-parser');
+const { createObjectCsvWriter } = require('csv-writer');
 
 class FileService {
     constructor() {
@@ -33,32 +34,33 @@ class FileService {
     async processCSV(inputPath, outputPath, imageUrlMap) {
         return new Promise((resolve, reject) => {
             const results = [];
-            const writeStream = fs.createWriteStream(outputPath);
-            let headers = null;
             
-            fs.createReadStream(inputPath)
+            fs.createReadStream(inputPath, { encoding: 'utf-8' })
                 .pipe(csv())
                 .on('data', (row) => {
-                    if (!headers) {
-                        headers = Object.keys(row);
-                        writeStream.write(headers.join(',') + '\n');
-                    }
-                    
                     const imageUrl = row.Images;
                     if (imageUrl) {
                         const fileName = path.basename(imageUrl);
                         row.Images = imageUrlMap.get(fileName) || imageUrl;
                     }
-                    
                     results.push(row);
-                    writeStream.write(headers.map(header => row[header]).join(',') + '\n');
                 })
-                .on('end', () => {
-                    writeStream.end();
-                    resolve(results);
+                .on('end', async () => {
+                    try {
+                        const headers = Object.keys(results[0]);
+                        const csvWriter = createObjectCsvWriter({
+                            path: outputPath,
+                            header: headers.map(header => ({ id: header, title: header })),
+                            encoding: 'utf-8'
+                        });
+
+                        await csvWriter.writeRecords(results);
+                        resolve(results);
+                    } catch (error) {
+                        reject(error);
+                    }
                 })
                 .on('error', (error) => {
-                    writeStream.end();
                     reject(error);
                 });
         });
