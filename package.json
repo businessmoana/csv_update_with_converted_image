@@ -1,0 +1,19 @@
+{
+  "name": "csv-update-with-converted-image",
+  "version": "1.0.0",
+  "description": "Tool to process CSV files and update image URLs with Google Cloud Storage links",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "nodemon src/index.js",
+    "start": "node src/index.js",
+    "process": "node src/index.js"
+  },
+  "dependencies": {
+    "@google-cloud/storage": "^7.7.0",
+    "csv-parser": "^3.0.0",
+    "csv-update-with-converted-image": "file:",
+    "dotenv": "^16.3.1",
+    "nodemon": "^3.1.10",
+    "xlsx": "^0.18.5"
+  }
+}
