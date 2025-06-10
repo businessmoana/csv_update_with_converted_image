@@ -34,33 +34,40 @@ class FileService {
     async processCSV(inputPath, outputPath, imageUrlMap) {
         return new Promise((resolve, reject) => {
             const results = [];
+            const writeStream = fs.createWriteStream(outputPath, { encoding: 'utf8' });
             
-            fs.createReadStream(inputPath, { encoding: 'utf-8' })
+            fs.createReadStream(inputPath, { encoding: 'utf8' })
                 .pipe(csv())
                 .on('data', (row) => {
-                    const imageUrl = row.Images;
-                    if (imageUrl) {
-                        const fileName = path.basename(imageUrl);
-                        row.Images = imageUrlMap.get(fileName) || imageUrl;
+                    if (row.Images) {
+                        const fileName = path.basename(row.Images);
+                        const newImageUrl = imageUrlMap.get(fileName);
+                        if (newImageUrl) {
+                            row.Images = newImageUrl;
+                        }
                     }
                     results.push(row);
                 })
-                .on('end', async () => {
-                    try {
-                        const headers = Object.keys(results[0]);
-                        const csvWriter = createObjectCsvWriter({
-                            path: outputPath,
-                            header: headers.map(header => ({ id: header, title: header })),
-                            encoding: 'utf-8'
+                .on('end', () => {
+                    const headers = Object.keys(results[0]);
+                    writeStream.write(headers.join(',') + '\n');
+                    
+                    results.forEach(row => {
+                        const values = headers.map(header => {
+                            const value = row[header] || '';
+                            if (value.includes(',') || value.includes('"')) {
+                                return `"${value.replace(/"/g, '""')}"`;
+                            }
+                            return value;
                         });
-
-                        await csvWriter.writeRecords(results);
-                        resolve(results);
-                    } catch (error) {
-                        reject(error);
-                    }
+                        writeStream.write(values.join(',') + '\n');
+                    });
+                    
+                    writeStream.end();
+                    resolve(results);
                 })
                 .on('error', (error) => {
+                    writeStream.end();
                     reject(error);
                 });
         });
